@@ -1,0 +1,1000 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Applied - Job Tracker</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --card-border: #cbd5e1;
+      --fg: #0f172a;
+      --fg-muted: #334155;
+      --primary: #1d4ed8;
+      --primary-fg: #ffffff;
+      --accent: #d97706;
+      --surface: #f1f5f9;
+      --border: #cbd5e1;
+      --pill-applied-bg: #dbeafe;
+      --pill-applied-fg: #1e40af;
+      --pill-interview-bg: #fef3c7;
+      --pill-interview-fg: #92400e;
+      --pill-offer-bg: #dcfce7;
+      --pill-offer-fg: #166534;
+      --pill-rejected-bg: #fee2e2;
+      --pill-rejected-fg: #991b1b;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color-scheme: light dark;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --card: #1e293b;
+        --card-border: #334155;
+        --fg: #f8fafc;
+        --fg-muted: #cbd5e1;
+        --primary: #38bdf8;
+        --primary-fg: #0f172a;
+        --accent: #fbbf24;
+        --surface: #1e293b;
+        --border: #475569;
+        --pill-applied-bg: #1e3a8a;
+        --pill-applied-fg: #bfdbfe;
+        --pill-interview-bg: #78350f;
+        --pill-interview-fg: #fde68a;
+        --pill-offer-bg: #064e3b;
+        --pill-offer-fg: #a7f3d0;
+        --pill-rejected-bg: #450a0a;
+        --pill-rejected-fg: #fecaca;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      -webkit-font-smoothing: antialiased;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    header {
+      padding: 16px;
+      background: var(--card);
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--primary);
+      color: var(--primary-fg);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.15rem;
+    }
+
+    h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      min-height: 48px;
+      min-width: 48px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      touch-action: manipulation;
+      transition: transform 0.1s ease, opacity 0.1s ease;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: var(--primary-fg);
+    }
+
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--fg);
+      border: 1px solid var(--border);
+    }
+
+    .btn-danger {
+      background: var(--pill-rejected-bg);
+      color: var(--pill-rejected-fg);
+      border: 1px solid var(--pill-rejected-fg);
+    }
+
+    main {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+
+    .search-box {
+      margin-bottom: 12px;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      min-height: 48px;
+      padding: 12px 14px 12px 42px;
+      border-radius: 10px;
+      border: 1px solid var(--card-border);
+      background: var(--card);
+      color: var(--fg);
+      font-size: 1rem; /* At least 16px prevents iOS zoom */
+      font-family: inherit;
+    }
+
+    .search-input:focus {
+      outline: 2px solid var(--primary);
+      border-color: transparent;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 14px;
+      width: 20px;
+      height: 20px;
+      stroke: var(--fg-muted);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 12px 6px;
+      min-height: 56px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.15s ease;
+    }
+
+    .stat-card.active {
+      border-color: var(--primary);
+      background: var(--surface);
+      box-shadow: inset 0 0 0 1px var(--primary);
+    }
+
+    .stat-num {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .stat-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--fg-muted);
+      text-transform: uppercase;
+      margin-top: 2px;
+      letter-spacing: 0.04em;
+    }
+
+    .conversion-banner {
+      background: var(--surface);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+    }
+
+    .conversion-value {
+      font-weight: 800;
+      color: var(--primary);
+      font-size: 1.1rem;
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 12px;
+      margin-bottom: 8px;
+      scrollbar-width: none;
+    }
+
+    .filter-tabs::-webkit-scrollbar { display: none; }
+
+    .tab-btn {
+      min-height: 44px;
+      padding: 8px 16px;
+      border-radius: 22px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      color: var(--fg-muted);
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: var(--primary-fg);
+      border-color: var(--primary);
+    }
+
+    .app-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      min-height: 64px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: border-color 0.15s ease;
+    }
+
+    .app-card:active {
+      background: var(--surface);
+    }
+
+    .app-info {
+      flex: 1;
+      padding-right: 12px;
+    }
+
+    .app-company {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--fg);
+    }
+
+    .app-role {
+      font-size: 0.95rem;
+      color: var(--fg-muted);
+      margin-top: 2px;
+    }
+
+    .app-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .app-tag {
+      font-size: 0.72rem;
+      background: var(--surface);
+      color: var(--fg-muted);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .app-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 6px;
+      font-size: 0.8rem;
+      color: var(--fg-muted);
+    }
+
+    .pill {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 9999px;
+      text-transform: capitalize;
+      letter-spacing: 0.02em;
+    }
+
+    .pill-applied { background: var(--pill-applied-bg); color: var(--pill-applied-fg); }
+    .pill-interview { background: var(--pill-interview-bg); color: var(--pill-interview-fg); }
+    .pill-offer { background: var(--pill-offer-bg); color: var(--pill-offer-fg); }
+    .pill-rejected { background: var(--pill-rejected-bg); color: var(--pill-rejected-fg); }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 16px;
+      color: var(--fg-muted);
+    }
+
+    .empty-state svg {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 12px;
+      stroke: var(--fg-muted);
+    }
+
+    /* Modal Sheet */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(2px);
+      z-index: 50;
+      display: none;
+      align-items: flex-end;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .sheet {
+      background: var(--card);
+      width: 100%;
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      padding: 24px 20px;
+      padding-bottom: calc(24px + env(safe-area-inset-bottom));
+      max-height: 85dvh;
+      overflow-y: auto;
+      border-top: 1px solid var(--card-border);
+      box-shadow: 0 -10px 25px rgba(0,0,0,0.2);
+    }
+
+    .sheet-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--fg-muted);
+      margin-bottom: 6px;
+    }
+
+    .form-input, .form-select {
+      width: 100%;
+      min-height: 48px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--fg);
+      font-size: 1rem;
+      font-family: inherit;
+    }
+
+    .form-input:focus, .form-select:focus {
+      outline: 2px solid var(--primary);
+      border-color: transparent;
+    }
+
+    .sheet-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .sheet-actions .btn {
+      flex: 1;
+    }
+
+    /* Timeline styles */
+    .timeline {
+      margin-top: 16px;
+      border-top: 1px solid var(--border);
+      padding-top: 14px;
+    }
+
+    .timeline-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--fg-muted);
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 12px;
+      position: relative;
+      padding-bottom: 14px;
+    }
+
+    .timeline-item:last-child {
+      padding-bottom: 0;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: 7px;
+      top: 16px;
+      bottom: 0;
+      width: 2px;
+      background: var(--border);
+    }
+
+    .timeline-item:last-child::before {
+      display: none;
+    }
+
+    .timeline-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--primary);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .timeline-content {
+      flex: 1;
+    }
+
+    .timeline-stage {
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-transform: capitalize;
+    }
+
+    .timeline-time {
+      font-size: 0.78rem;
+      color: var(--fg-muted);
+    }
+
+    .timeline-note {
+      font-size: 0.85rem;
+      color: var(--fg);
+      margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="brand-icon">A</div>
+      <div>
+        <h1>Applied</h1>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button id="exportBtn" class="btn btn-secondary" aria-label="Export Data" title="Export Applications" style="min-width: 44px; padding: 8px 12px;">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+      </button>
+      <button id="openAddBtn" class="btn btn-primary" aria-label="Add Application">+ Add</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Search Bar -->
+    <div class="search-box">
+      <svg class="search-icon" fill="none" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="M21 21l-4.35-4.35"></path></svg>
+      <input class="search-input" id="searchInput" type="search" placeholder="Search company, role, or tags..." autocomplete="off">
+    </div>
+
+    <!-- Pipeline Stats -->
+    <div class="stats">
+      <div class="stat-card active" data-filter="all">
+        <div class="stat-num" id="sTotal">0</div>
+        <div class="stat-label">Total</div>
+      </div>
+      <div class="stat-card" data-filter="applied">
+        <div class="stat-num" id="sApplied">0</div>
+        <div class="stat-label">Applied</div>
+      </div>
+      <div class="stat-card" data-filter="interview">
+        <div class="stat-num" id="sInterview">0</div>
+        <div class="stat-label">Interview</div>
+      </div>
+      <div class="stat-card" data-filter="offer">
+        <div class="stat-num" id="sOffer">0</div>
+        <div class="stat-label">Offer</div>
+      </div>
+    </div>
+
+    <!-- Conversion Analytics -->
+    <div class="conversion-banner">
+      <div><b>Interview Conversion Rate</b><div style="font-size: 0.75rem; color: var(--fg-muted);">Applied → Interview/Offer</div></div>
+      <div class="conversion-value" id="conversionRate">0%</div>
+    </div>
+
+    <!-- Stage Filter Tabs -->
+    <div class="filter-tabs">
+      <button class="tab-btn active" data-filter="all">All</button>
+      <button class="tab-btn" data-filter="applied">Applied</button>
+      <button class="tab-btn" data-filter="interview">Interview</button>
+      <button class="tab-btn" data-filter="offer">Offer</button>
+      <button class="tab-btn" data-filter="rejected">Rejected</button>
+    </div>
+
+    <!-- Application List -->
+    <div id="appList">
+      <div class="empty-state">
+        <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+        <p style="font-weight: 600;">No applications in this view</p>
+        <p style="font-size: 0.85rem; margin-top: 4px;">Tap "+ Add" to log your first job application.</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Add Application Modal Sheet -->
+  <div class="modal-overlay" id="addModal">
+    <div class="sheet">
+      <h2 class="sheet-title">Add Job Application</h2>
+      <form id="addForm">
+        <div class="form-group">
+          <label class="form-label" for="companyInput">Company Name *</label>
+          <input class="form-input" id="companyInput" type="text" placeholder="e.g. CloudCrane, Google, Stripe" required autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="roleInput">Position / Role *</label>
+          <input class="form-input" id="roleInput" type="text" placeholder="e.g. Senior Software Engineer" required autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="tagsInput">Tags (comma-separated)</label>
+          <input class="form-input" id="tagsInput" type="text" placeholder="e.g. Remote, FullStack, Startup">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="dateInput">Date Applied</label>
+          <input class="form-input" id="dateInput" type="date">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="statusSelect">Stage / Status</label>
+          <select class="form-select" id="statusSelect">
+            <option value="applied">Applied</option>
+            <option value="interview">Interview</option>
+            <option value="offer">Offer</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="salaryInput">Salary / Notes (Optional)</label>
+          <input class="form-input" id="salaryInput" type="text" placeholder="e.g. $140k base, referral by Jane">
+        </div>
+        <div class="sheet-actions">
+          <button type="button" class="btn btn-secondary" id="closeAddBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Application</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit / Detail Sheet with Timeline -->
+  <div class="modal-overlay" id="editModal">
+    <div class="sheet">
+      <h2 class="sheet-title" id="editCompanyTitle">Application Details</h2>
+      <div style="font-size: 0.95rem; color: var(--fg-muted); margin-bottom: 16px;" id="editRoleSub"></div>
+      
+      <div class="form-group">
+        <label class="form-label" for="editStatusSelect">Update Stage</label>
+        <select class="form-select" id="editStatusSelect">
+          <option value="applied">Applied</option>
+          <option value="interview">Interview</option>
+          <option value="offer">Offer</option>
+          <option value="rejected">Rejected</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="editStageNote">Stage Transition Note</label>
+        <input class="form-input" id="editStageNote" type="text" placeholder="e.g. Cleared technical interview, scheduling system design">
+      </div>
+
+      <div class="timeline">
+        <div class="timeline-title">Stage History</div>
+        <div id="timelineList"></div>
+      </div>
+
+      <div class="sheet-actions">
+        <button type="button" class="btn btn-danger" id="deleteAppBtn">Delete</button>
+        <button type="button" class="btn btn-primary" id="saveEditBtn">Update Stage</button>
+      </div>
+      <div style="margin-top: 12px; text-align: center;">
+        <button type="button" class="btn btn-secondary" id="closeEditBtn" style="width: 100%;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const STORAGE_KEY = 'applied_data';
+      let currentFilter = 'all';
+      let searchQuery = '';
+      let selectedAppId = null;
+
+      // Schema Version 3 Migration: supports v1, v2, and v3 gracefully
+      function getStore() {
+        let store = { version: 3, applications: [] };
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) store = JSON.parse(raw);
+        } catch(e) {}
+
+        // Multi-version migration
+        if (!store.version || store.version < 3) {
+          (store.applications || []).forEach(app => {
+            if (!app.statusHistory || !Array.isArray(app.statusHistory)) {
+              app.statusHistory = [{
+                status: app.status || 'applied',
+                timestamp: app.date ? new Date(app.date).toISOString() : (app.createdAt || new Date().toISOString()),
+                note: 'Initial application'
+              }];
+            }
+            if (!app.tags || !Array.isArray(app.tags)) {
+              app.tags = [];
+            }
+          });
+          store.version = 3;
+          saveStore(store);
+        }
+
+        return store;
+      }
+
+      function saveStore(store) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+        render();
+      }
+
+      window.appState = getStore;
+
+      // DOM Elements
+      const appList = document.getElementById('appList');
+      const searchInput = document.getElementById('searchInput');
+      const conversionRate = document.getElementById('conversionRate');
+      const sTotal = document.getElementById('sTotal');
+      const sApplied = document.getElementById('sApplied');
+      const sInterview = document.getElementById('sInterview');
+      const sOffer = document.getElementById('sOffer');
+      const addModal = document.getElementById('addModal');
+      const editModal = document.getElementById('editModal');
+      const openAddBtn = document.getElementById('openAddBtn');
+      const closeAddBtn = document.getElementById('closeAddBtn');
+      const exportBtn = document.getElementById('exportBtn');
+      const addForm = document.getElementById('addForm');
+      const dateInput = document.getElementById('dateInput');
+      const editStatusSelect = document.getElementById('editStatusSelect');
+      const editStageNote = document.getElementById('editStageNote');
+      const editCompanyTitle = document.getElementById('editCompanyTitle');
+      const editRoleSub = document.getElementById('editRoleSub');
+      const timelineList = document.getElementById('timelineList');
+      const saveEditBtn = document.getElementById('saveEditBtn');
+      const deleteAppBtn = document.getElementById('deleteAppBtn');
+      const closeEditBtn = document.getElementById('closeEditBtn');
+
+      dateInput.value = new Date().toISOString().split('T')[0];
+
+      function render() {
+        const store = getStore();
+        const apps = store.applications || [];
+
+        // Update stats
+        const total = apps.length;
+        const appliedCount = apps.filter(a => a.status === 'applied').length;
+        const interviewCount = apps.filter(a => a.status === 'interview').length;
+        const offerCount = apps.filter(a => a.status === 'offer').length;
+
+        sTotal.textContent = total;
+        sApplied.textContent = appliedCount;
+        sInterview.textContent = interviewCount;
+        sOffer.textContent = offerCount;
+
+        // Conversion rate
+        if (total > 0) {
+          const converted = interviewCount + offerCount;
+          const rate = Math.round((converted / total) * 100);
+          conversionRate.textContent = rate + '%';
+        } else {
+          conversionRate.textContent = '0%';
+        }
+
+        // Filter & Search
+        const q = searchQuery.toLowerCase().trim();
+        const filtered = apps.filter(app => {
+          const matchesFilter = (currentFilter === 'all') || (app.status === currentFilter);
+          if (!matchesFilter) return false;
+
+          if (!q) return true;
+          const matchCompany = (app.company || '').toLowerCase().includes(q);
+          const matchRole = (app.role || '').toLowerCase().includes(q);
+          const matchNotes = (app.salary || '').toLowerCase().includes(q);
+          const matchTags = (app.tags || []).some(t => t.toLowerCase().includes(q));
+          return matchCompany || matchRole || matchNotes || matchTags;
+        });
+
+        if (filtered.length === 0) {
+          appList.innerHTML = `
+            <div class="empty-state">
+              <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+              <p style="font-weight: 600;">No applications found</p>
+              <p style="font-size: 0.85rem; margin-top: 4px;">${q ? 'Try clearing your search query.' : 'Tap "+ Add" to log your first job application.'}</p>
+            </div>
+          `;
+          return;
+        }
+
+        appList.innerHTML = filtered.map(app => {
+          const historyCount = (app.statusHistory || []).length;
+          const tags = app.tags || [];
+          return `
+            <div class="app-card" data-id="${app.id}">
+              <div class="app-info">
+                <div class="app-company">${escapeHtml(app.company)}</div>
+                <div class="app-role">${escapeHtml(app.role)} ${app.salary ? '• ' + escapeHtml(app.salary) : ''}</div>
+                ${tags.length > 0 ? `
+                  <div class="app-tags">
+                    ${tags.map(t => `<span class="app-tag">#${escapeHtml(t)}</span>`).join('')}
+                  </div>
+                ` : ''}
+                <div class="app-meta">
+                  <span>Applied: ${app.date || 'Recent'}</span>
+                  <span>•</span>
+                  <span>${historyCount} stage ${historyCount === 1 ? 'entry' : 'entries'}</span>
+                </div>
+              </div>
+              <div class="pill pill-${app.status}">${app.status}</div>
+            </div>
+          `;
+        }).join('');
+
+        // Attach click listeners to cards
+        document.querySelectorAll('.app-card').forEach(card => {
+          card.addEventListener('click', () => {
+            const id = card.getAttribute('data-id');
+            openEdit(id);
+          });
+        });
+      }
+
+      function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>"']/g, function(m) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+        });
+      }
+
+      function formatDate(isoStr) {
+        if (!isoStr) return '';
+        try {
+          const d = new Date(isoStr);
+          return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+        } catch(e) {
+          return isoStr;
+        }
+      }
+
+      // Search input listener
+      searchInput.addEventListener('input', (e) => {
+        searchQuery = e.target.value;
+        render();
+      });
+
+      // Export handler
+      exportBtn.addEventListener('click', () => {
+        const store = getStore();
+        const jsonStr = JSON.stringify(store.applications || [], null, 2);
+        
+        if (navigator.share) {
+          navigator.share({
+            title: 'Applied - Job Applications Backup',
+            text: jsonStr
+          }).catch(() => {});
+        } else {
+          const blob = new Blob([jsonStr], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `applied-applications-${new Date().toISOString().split('T')[0]}.json`;
+          a.click();
+          URL.revokeObjectURL(url);
+        }
+      });
+
+      // Add Modal
+      openAddBtn.addEventListener('click', () => {
+        addForm.reset();
+        dateInput.value = new Date().toISOString().split('T')[0];
+        addModal.classList.add('open');
+      });
+
+      closeAddBtn.addEventListener('click', () => {
+        addModal.classList.remove('open');
+      });
+
+      addForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const company = document.getElementById('companyInput').value.trim();
+        const role = document.getElementById('roleInput').value.trim();
+        const rawTags = document.getElementById('tagsInput').value.trim();
+        const date = dateInput.value;
+        const status = document.getElementById('statusSelect').value;
+        const salary = document.getElementById('salaryInput').value.trim();
+
+        if (!company || !role) return;
+
+        const tags = rawTags 
+          ? rawTags.split(',').map(t => t.trim().replace(/^#/, '')).filter(Boolean)
+          : [];
+
+        const store = getStore();
+        const now = new Date().toISOString();
+        const newApp = {
+          id: 'app_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+          company,
+          role,
+          tags,
+          date,
+          status,
+          salary,
+          createdAt: now,
+          statusHistory: [
+            {
+              status,
+              timestamp: now,
+              note: 'Application logged'
+            }
+          ]
+        };
+
+        store.applications.unshift(newApp);
+        saveStore(store);
+
+        if (navigator.vibrate) navigator.vibrate(25);
+        addModal.classList.remove('open');
+      });
+
+      // Edit / Details with Timeline
+      function openEdit(id) {
+        selectedAppId = id;
+        const store = getStore();
+        const app = store.applications.find(a => a.id === id);
+        if (!app) return;
+
+        editCompanyTitle.textContent = app.company;
+        editRoleSub.textContent = app.role + (app.salary ? ' • ' + app.salary : '');
+        editStatusSelect.value = app.status;
+        editStageNote.value = '';
+
+        // Render timeline
+        const history = app.statusHistory || [];
+        if (history.length === 0) {
+          timelineList.innerHTML = '<div style="font-size: 0.85rem; color: var(--fg-muted);">No history recorded yet.</div>';
+        } else {
+          timelineList.innerHTML = history.slice().reverse().map(h => `
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
+                <div class="timeline-stage">${escapeHtml(h.status)}</div>
+                <div class="timeline-time">${formatDate(h.timestamp)}</div>
+                ${h.note ? `<div class="timeline-note">${escapeHtml(h.note)}</div>` : ''}
+              </div>
+            </div>
+          `).join('');
+        }
+
+        editModal.classList.add('open');
+      }
+
+      saveEditBtn.addEventListener('click', () => {
+        if (!selectedAppId) return;
+        const store = getStore();
+        const app = store.applications.find(a => a.id === selectedAppId);
+        if (app) {
+          const newStatus = editStatusSelect.value;
+          const note = editStageNote.value.trim();
+          
+          if (!app.statusHistory) app.statusHistory = [];
+          
+          if (app.status !== newStatus || note) {
+            app.status = newStatus;
+            app.statusHistory.push({
+              status: newStatus,
+              timestamp: new Date().toISOString(),
+              note: note || `Stage updated to ${newStatus}`
+            });
+          }
+
+          saveStore(store);
+          if (navigator.vibrate) navigator.vibrate(25);
+        }
+        editModal.classList.remove('open');
+      });
+
+      deleteAppBtn.addEventListener('click', () => {
+        if (!selectedAppId) return;
+        const store = getStore();
+        store.applications = store.applications.filter(a => a.id !== selectedAppId);
+        saveStore(store);
+        editModal.classList.remove('open');
+      });
+
+      closeEditBtn.addEventListener('click', () => {
+        editModal.classList.remove('open');
+      });
+
+      // Filter tabs
+      document.querySelectorAll('.tab-btn, .stat-card').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const filter = btn.getAttribute('data-filter');
+          if (!filter) return;
+          currentFilter = filter;
+
+          document.querySelectorAll('.tab-btn').forEach(t => {
+            t.classList.toggle('active', t.getAttribute('data-filter') === filter);
+          });
+          document.querySelectorAll('.stat-card').forEach(s => {
+            s.classList.toggle('active', s.getAttribute('data-filter') === filter);
+          });
+
+          render();
+        });
+      });
+
+      // Initial render
+      render();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,670 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Applied - Job Tracker</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --card-border: #e2e8f0;
+      --fg: #0f172a;
+      --fg-muted: #64748b;
+      --primary: #2563eb;
+      --primary-fg: #ffffff;
+      --accent: #f59e0b;
+      --surface: #f1f5f9;
+      --border: #cbd5e1;
+      --pill-applied-bg: #dbeafe;
+      --pill-applied-fg: #1e40af;
+      --pill-interview-bg: #fef3c7;
+      --pill-interview-fg: #92400e;
+      --pill-offer-bg: #dcfce7;
+      --pill-offer-fg: #166534;
+      --pill-rejected-bg: #fee2e2;
+      --pill-rejected-fg: #991b1b;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color-scheme: light dark;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --card: #1e293b;
+        --card-border: #334155;
+        --fg: #f8fafc;
+        --fg-muted: #94a3b8;
+        --primary: #38bdf8;
+        --primary-fg: #0f172a;
+        --accent: #fbbf24;
+        --surface: #1e293b;
+        --border: #334155;
+        --pill-applied-bg: #1e3a8a;
+        --pill-applied-fg: #bfdbfe;
+        --pill-interview-bg: #78350f;
+        --pill-interview-fg: #fde68a;
+        --pill-offer-bg: #064e3b;
+        --pill-offer-fg: #a7f3d0;
+        --pill-rejected-bg: #450a0a;
+        --pill-rejected-fg: #fecaca;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      -webkit-font-smoothing: antialiased;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    header {
+      padding: 16px;
+      background: var(--card);
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--primary);
+      color: var(--primary-fg);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.1rem;
+    }
+
+    h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .btn {
+      min-height: 44px;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      touch-action: manipulation;
+      transition: transform 0.1s ease, opacity 0.1s ease;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: var(--primary-fg);
+    }
+
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--fg);
+      border: 1px solid var(--border);
+    }
+
+    .btn-danger {
+      background: var(--pill-rejected-bg);
+      color: var(--pill-rejected-fg);
+      border: 1px solid var(--pill-rejected-fg);
+    }
+
+    main {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 10px 6px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.15s ease;
+    }
+
+    .stat-card.active {
+      border-color: var(--primary);
+      background: var(--surface);
+    }
+
+    .stat-num {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .stat-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--fg-muted);
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+      scrollbar-width: none;
+    }
+
+    .filter-tabs::-webkit-scrollbar { display: none; }
+
+    .tab-btn {
+      min-height: 38px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      color: var(--fg-muted);
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: var(--primary-fg);
+      border-color: var(--primary);
+    }
+
+    .app-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: border-color 0.15s ease;
+    }
+
+    .app-card:active {
+      background: var(--surface);
+    }
+
+    .app-info {
+      flex: 1;
+      padding-right: 12px;
+    }
+
+    .app-company {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--fg);
+    }
+
+    .app-role {
+      font-size: 0.95rem;
+      color: var(--fg-muted);
+      margin-top: 2px;
+    }
+
+    .app-date {
+      font-size: 0.8rem;
+      color: var(--fg-muted);
+      margin-top: 6px;
+    }
+
+    .pill {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 9999px;
+      text-transform: capitalize;
+      letter-spacing: 0.02em;
+    }
+
+    .pill-applied { background: var(--pill-applied-bg); color: var(--pill-applied-fg); }
+    .pill-interview { background: var(--pill-interview-bg); color: var(--pill-interview-fg); }
+    .pill-offer { background: var(--pill-offer-bg); color: var(--pill-offer-fg); }
+    .pill-rejected { background: var(--pill-rejected-bg); color: var(--pill-rejected-fg); }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 16px;
+      color: var(--fg-muted);
+    }
+
+    .empty-state svg {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 12px;
+      stroke: var(--fg-muted);
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(2px);
+      z-index: 50;
+      display: none;
+      align-items: flex-end;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .sheet {
+      background: var(--card);
+      width: 100%;
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      padding: 24px 20px;
+      padding-bottom: calc(24px + env(safe-area-inset-bottom));
+      max-height: 85dvh;
+      overflow-y: auto;
+      border-top: 1px solid var(--card-border);
+      box-shadow: 0 -10px 25px rgba(0,0,0,0.2);
+    }
+
+    .sheet-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--fg-muted);
+      margin-bottom: 6px;
+    }
+
+    .form-input, .form-select {
+      width: 100%;
+      min-height: 48px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--fg);
+      font-size: 1rem;
+      font-family: inherit;
+    }
+
+    .form-input:focus, .form-select:focus {
+      outline: 2px solid var(--primary);
+      border-color: transparent;
+    }
+
+    .sheet-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .sheet-actions .btn {
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="brand-icon">A</div>
+      <div>
+        <h1>Applied</h1>
+      </div>
+    </div>
+    <button id="openAddBtn" class="btn btn-primary" style="min-height: 40px; padding: 8px 16px; font-size: 0.95rem;">+ Add</button>
+  </header>
+
+  <main>
+    <div class="stats">
+      <div class="stat-card active" data-filter="all">
+        <div class="stat-num" id="sTotal">0</div>
+        <div class="stat-label">Total</div>
+      </div>
+      <div class="stat-card" data-filter="applied">
+        <div class="stat-num" id="sApplied">0</div>
+        <div class="stat-label">Applied</div>
+      </div>
+      <div class="stat-card" data-filter="interview">
+        <div class="stat-num" id="sInterview">0</div>
+        <div class="stat-label">Interview</div>
+      </div>
+      <div class="stat-card" data-filter="offer">
+        <div class="stat-num" id="sOffer">0</div>
+        <div class="stat-label">Offer</div>
+      </div>
+    </div>
+
+    <div class="filter-tabs">
+      <button class="tab-btn active" data-filter="all">All</button>
+      <button class="tab-btn" data-filter="applied">Applied</button>
+      <button class="tab-btn" data-filter="interview">Interview</button>
+      <button class="tab-btn" data-filter="offer">Offer</button>
+      <button class="tab-btn" data-filter="rejected">Rejected</button>
+    </div>
+
+    <div id="appList">
+      <div class="empty-state">
+        <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+        <p style="font-weight: 600;">No applications in this view</p>
+        <p style="font-size: 0.85rem; margin-top: 4px;">Tap "+ Add" to log your first job application.</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Add Application Modal Sheet -->
+  <div class="modal-overlay" id="addModal">
+    <div class="sheet">
+      <h2 class="sheet-title">Add Job Application</h2>
+      <form id="addForm">
+        <div class="form-group">
+          <label class="form-label" for="companyInput">Company Name *</label>
+          <input class="form-input" id="companyInput" type="text" placeholder="e.g. CloudCrane, Google, Stripe" required autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="roleInput">Position / Role *</label>
+          <input class="form-input" id="roleInput" type="text" placeholder="e.g. Senior Software Engineer" required autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="dateInput">Date Applied</label>
+          <input class="form-input" id="dateInput" type="date">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="statusSelect">Stage / Status</label>
+          <select class="form-select" id="statusSelect">
+            <option value="applied">Applied</option>
+            <option value="interview">Interview</option>
+            <option value="offer">Offer</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="salaryInput">Salary / Notes (Optional)</label>
+          <input class="form-input" id="salaryInput" type="text" placeholder="e.g. Remote, $140k base">
+        </div>
+        <div class="sheet-actions">
+          <button type="button" class="btn btn-secondary" id="closeAddBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Application</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit / Detail Sheet -->
+  <div class="modal-overlay" id="editModal">
+    <div class="sheet">
+      <h2 class="sheet-title" id="editCompanyTitle">Application Details</h2>
+      <div style="font-size: 0.95rem; color: var(--fg-muted); margin-bottom: 16px;" id="editRoleSub"></div>
+      
+      <div class="form-group">
+        <label class="form-label">Update Stage</label>
+        <select class="form-select" id="editStatusSelect">
+          <option value="applied">Applied</option>
+          <option value="interview">Interview</option>
+          <option value="offer">Offer</option>
+          <option value="rejected">Rejected</option>
+        </select>
+      </div>
+
+      <div class="sheet-actions">
+        <button type="button" class="btn btn-danger" id="deleteAppBtn">Delete</button>
+        <button type="button" class="btn btn-primary" id="saveEditBtn">Update Status</button>
+      </div>
+      <div style="margin-top: 12px; text-align: center;">
+        <button type="button" class="btn btn-secondary" id="closeEditBtn" style="min-height: 40px; width: 100%;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const STORAGE_KEY = 'applied_data';
+      let currentFilter = 'all';
+      let selectedAppId = null;
+
+      function getStore() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) return JSON.parse(raw);
+        } catch(e) {}
+        return { version: 1, applications: [] };
+      }
+
+      function saveStore(store) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+        render();
+      }
+
+      window.appState = getStore;
+
+      // DOM Elements
+      const appList = document.getElementById('appList');
+      const sTotal = document.getElementById('sTotal');
+      const sApplied = document.getElementById('sApplied');
+      const sInterview = document.getElementById('sInterview');
+      const sOffer = document.getElementById('sOffer');
+      const addModal = document.getElementById('addModal');
+      const editModal = document.getElementById('editModal');
+      const openAddBtn = document.getElementById('openAddBtn');
+      const closeAddBtn = document.getElementById('closeAddBtn');
+      const addForm = document.getElementById('addForm');
+      const dateInput = document.getElementById('dateInput');
+      const editStatusSelect = document.getElementById('editStatusSelect');
+      const editCompanyTitle = document.getElementById('editCompanyTitle');
+      const editRoleSub = document.getElementById('editRoleSub');
+      const saveEditBtn = document.getElementById('saveEditBtn');
+      const deleteAppBtn = document.getElementById('deleteAppBtn');
+      const closeEditBtn = document.getElementById('closeEditBtn');
+
+      dateInput.value = new Date().toISOString().split('T')[0];
+
+      function render() {
+        const store = getStore();
+        const apps = store.applications || [];
+
+        // Update stats
+        sTotal.textContent = apps.length;
+        sApplied.textContent = apps.filter(a => a.status === 'applied').length;
+        sInterview.textContent = apps.filter(a => a.status === 'interview').length;
+        sOffer.textContent = apps.filter(a => a.status === 'offer').length;
+
+        // Filter list
+        const filtered = currentFilter === 'all' 
+          ? apps 
+          : apps.filter(a => a.status === currentFilter);
+
+        if (filtered.length === 0) {
+          appList.innerHTML = `
+            <div class="empty-state">
+              <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+              <p style="font-weight: 600;">No applications in this view</p>
+              <p style="font-size: 0.85rem; margin-top: 4px;">Tap "+ Add" to log your first job application.</p>
+            </div>
+          `;
+          return;
+        }
+
+        appList.innerHTML = filtered.map(app => `
+          <div class="app-card" data-id="${app.id}">
+            <div class="app-info">
+              <div class="app-company">${escapeHtml(app.company)}</div>
+              <div class="app-role">${escapeHtml(app.role)} ${app.salary ? '• ' + escapeHtml(app.salary) : ''}</div>
+              <div class="app-date">Applied: ${app.date || 'Recent'}</div>
+            </div>
+            <div class="pill pill-${app.status}">${app.status}</div>
+          </div>
+        `).join('');
+
+        // Attach click listeners to cards
+        document.querySelectorAll('.app-card').forEach(card => {
+          card.addEventListener('click', () => {
+            const id = card.getAttribute('data-id');
+            openEdit(id);
+          });
+        });
+      }
+
+      function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>"']/g, function(m) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+        });
+      }
+
+      // Add Modal
+      openAddBtn.addEventListener('click', () => {
+        addForm.reset();
+        dateInput.value = new Date().toISOString().split('T')[0];
+        addModal.classList.add('open');
+      });
+
+      closeAddBtn.addEventListener('click', () => {
+        addModal.classList.remove('open');
+      });
+
+      addForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const company = document.getElementById('companyInput').value.trim();
+        const role = document.getElementById('roleInput').value.trim();
+        const date = dateInput.value;
+        const status = document.getElementById('statusSelect').value;
+        const salary = document.getElementById('salaryInput').value.trim();
+
+        if (!company || !role) return;
+
+        const store = getStore();
+        const newApp = {
+          id: 'app_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+          company,
+          role,
+          date,
+          status,
+          salary,
+          createdAt: new Date().toISOString()
+        };
+
+        store.applications.unshift(newApp);
+        saveStore(store);
+
+        if (navigator.vibrate) navigator.vibrate(25);
+        addModal.classList.remove('open');
+      });
+
+      // Edit / Details
+      function openEdit(id) {
+        selectedAppId = id;
+        const store = getStore();
+        const app = store.applications.find(a => a.id === id);
+        if (!app) return;
+
+        editCompanyTitle.textContent = app.company;
+        editRoleSub.textContent = app.role + (app.salary ? ' • ' + app.salary : '');
+        editStatusSelect.value = app.status;
+        editModal.classList.add('open');
+      }
+
+      saveEditBtn.addEventListener('click', () => {
+        if (!selectedAppId) return;
+        const store = getStore();
+        const app = store.applications.find(a => a.id === selectedAppId);
+        if (app) {
+          app.status = editStatusSelect.value;
+          saveStore(store);
+          if (navigator.vibrate) navigator.vibrate(25);
+        }
+        editModal.classList.remove('open');
+      });
+
+      deleteAppBtn.addEventListener('click', () => {
+        if (!selectedAppId) return;
+        const store = getStore();
+        store.applications = store.applications.filter(a => a.id !== selectedAppId);
+        saveStore(store);
+        editModal.classList.remove('open');
+      });
+
+      closeEditBtn.addEventListener('click', () => {
+        editModal.classList.remove('open');
+      });
+
+      // Filter tabs
+      document.querySelectorAll('.tab-btn, .stat-card').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const filter = btn.getAttribute('data-filter');
+          if (!filter) return;
+          currentFilter = filter;
+
+          document.querySelectorAll('.tab-btn').forEach(t => {
+            t.classList.toggle('active', t.getAttribute('data-filter') === filter);
+          });
+          document.querySelectorAll('.stat-card').forEach(s => {
+            s.classList.toggle('active', s.getAttribute('data-filter') === filter);
+          });
+
+          render();
+        });
+      });
+
+      // Initial render
+      render();
+    })();
+  </script>
+</body>
+</html>
