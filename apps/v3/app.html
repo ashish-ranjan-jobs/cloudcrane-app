@@ -520,7 +520,8 @@
       </div>
     </div>
     <div class="header-actions">
-      <button id="exportBtn" class="btn btn-secondary" aria-label="Export Data" title="Export Applications" style="min-width: 44px; padding: 8px 12px;">
+      <button id="sampleBtn" class="btn btn-secondary" aria-label="Demo Pipeline" title="Load Sample Demo Pipeline" style="min-width: 48px; padding: 8px 12px; font-size: 0.85rem; font-weight: 600;">⚡ Demo</button>
+      <button id="exportBtn" class="btn btn-secondary" aria-label="Export Data" title="Export Applications" style="min-width: 48px; padding: 8px 12px;">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
       </button>
       <button id="openAddBtn" class="btn btn-primary" aria-label="Add Application">+ Add</button>
@@ -664,13 +665,121 @@
       let searchQuery = '';
       let selectedAppId = null;
 
+      const SAMPLE_DATA = [
+        {
+          id: 'app_sample_1',
+          company: 'CloudCrane',
+          role: 'Full Stack Engineer',
+          status: 'interview',
+          date: '2026-11-12',
+          salary: '$165,000 / yr',
+          tags: ['Remote', 'AI', 'Cloud', 'TypeScript'],
+          notes: 'Completed initial screening. Built prototype app with MCP integration.',
+          createdAt: '2026-11-12T10:00:00.000Z',
+          statusHistory: [
+            {
+              status: 'applied',
+              timestamp: '2026-11-12T10:00:00.000Z',
+              note: 'Applied through careers portal with portfolio & GitHub.'
+            },
+            {
+              status: 'interview',
+              timestamp: '2026-11-14T14:30:00.000Z',
+              note: 'Shortlisted for first round app building challenge.'
+            }
+          ]
+        },
+        {
+          id: 'app_sample_2',
+          company: 'Stripe',
+          role: 'Staff Infrastructure Engineer',
+          status: 'offer',
+          date: '2026-11-05',
+          salary: '$210,000 / yr + equity',
+          tags: ['Fintech', 'DistributedSystems', 'Go'],
+          notes: 'Received written offer following team match and partner conversation.',
+          createdAt: '2026-11-05T09:00:00.000Z',
+          statusHistory: [
+            {
+              status: 'applied',
+              timestamp: '2026-11-05T09:00:00.000Z',
+              note: 'Referred by senior staff engineer.'
+            },
+            {
+              status: 'interview',
+              timestamp: '2026-11-08T11:00:00.000Z',
+              note: 'Passed systems architecture & distributed consensus rounds.'
+            },
+            {
+              status: 'offer',
+              timestamp: '2026-11-14T16:00:00.000Z',
+              note: 'Official offer letter received. Reviewing compensation package.'
+            }
+          ]
+        },
+        {
+          id: 'app_sample_3',
+          company: 'Anthropic',
+          role: 'AI Research Engineer - Tool Use',
+          status: 'interview',
+          date: '2026-11-09',
+          salary: '$195,000 / yr',
+          tags: ['LLM', 'Python', 'Evaluation', 'MCP'],
+          notes: 'Technical discussion on agent harness design and safety boundaries.',
+          createdAt: '2026-11-09T12:00:00.000Z',
+          statusHistory: [
+            {
+              status: 'applied',
+              timestamp: '2026-11-09T12:00:00.000Z',
+              note: 'Submitted application with AI evaluation benchmark project.'
+            },
+            {
+              status: 'interview',
+              timestamp: '2026-11-13T17:00:00.000Z',
+              note: 'Completed deep dive into MCP tool orchestration architectures.'
+            }
+          ]
+        },
+        {
+          id: 'app_sample_4',
+          company: 'Linear',
+          role: 'Senior Product Engineer',
+          status: 'applied',
+          date: '2026-11-15',
+          salary: '$170,000 / yr',
+          tags: ['Frontend', 'TypeScript', 'Design', 'Remote'],
+          notes: 'Applied for remote core-sync product team.',
+          createdAt: '2026-11-15T08:30:00.000Z',
+          statusHistory: [
+            {
+              status: 'applied',
+              timestamp: '2026-11-15T08:30:00.000Z',
+              note: 'Applied directly with sample linear keyboard shortcut interaction demo.'
+            }
+          ]
+        }
+      ];
+
       // Schema Version 3 Migration: supports v1, v2, and v3 gracefully
       function getStore() {
-        let store = { version: 3, applications: [] };
+        let store = null;
         try {
           const raw = localStorage.getItem(STORAGE_KEY);
-          if (raw) store = JSON.parse(raw);
+          if (raw !== null) {
+            store = JSON.parse(raw);
+          }
         } catch(e) {}
+
+        // Pre-populate dummy data on first visit
+        if (!store || !Array.isArray(store.applications) || (store.applications.length === 0 && !sessionStorage.getItem('applied_explicit_clear'))) {
+          store = {
+            version: 3,
+            applications: JSON.parse(JSON.stringify(SAMPLE_DATA))
+          };
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+          } catch(e) {}
+        }
 
         // Multi-version migration
         if (!store.version || store.version < 3) {
@@ -770,8 +879,17 @@
               <svg fill="none" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
               <p style="font-weight: 600;">No applications found</p>
               <p style="font-size: 0.85rem; margin-top: 4px;">${q ? 'Try clearing your search query.' : 'Tap "+ Add" to log your first job application.'}</p>
+              <button type="button" class="btn btn-secondary" id="loadSampleBtn" style="margin-top: 14px; min-height: 48px; padding: 10px 18px; font-size: 0.95rem; font-weight: 600;">⚡ Load Sample Pipeline</button>
             </div>
           `;
+          const loadSampleBtn = document.getElementById('loadSampleBtn');
+          if (loadSampleBtn) {
+            loadSampleBtn.addEventListener('click', () => {
+              sessionStorage.removeItem('applied_explicit_clear');
+              saveStore({ version: 3, applications: JSON.parse(JSON.stringify(SAMPLE_DATA)) });
+              if (navigator.vibrate) navigator.vibrate(30);
+            });
+          }
           return;
         }
 
@@ -851,6 +969,16 @@
           URL.revokeObjectURL(url);
         }
       });
+
+      // Sample Data button handler
+      const sampleBtn = document.getElementById('sampleBtn');
+      if (sampleBtn) {
+        sampleBtn.addEventListener('click', () => {
+          sessionStorage.removeItem('applied_explicit_clear');
+          saveStore({ version: 3, applications: JSON.parse(JSON.stringify(SAMPLE_DATA)) });
+          if (navigator.vibrate) navigator.vibrate(30);
+        });
+      }
 
       // Add Modal
       openAddBtn.addEventListener('click', () => {
@@ -965,7 +1093,10 @@
       deleteAppBtn.addEventListener('click', () => {
         if (!selectedAppId) return;
         const store = getStore();
-        store.applications = store.applications.filter(a => a.id !== selectedAppId);
+        store.applications = (store.applications || []).filter(a => a.id !== selectedAppId);
+        if (store.applications.length === 0) {
+          sessionStorage.setItem('applied_explicit_clear', '1');
+        }
         saveStore(store);
         editModal.classList.remove('open');
       });
