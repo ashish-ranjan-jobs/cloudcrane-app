@@ -1,12 +1,12 @@
 # Applied — Job Application Tracker 📱
 
 [![Quality Score](https://img.shields.io/badge/CloudCrane%20Quality%20Score-100%2F100-success)](https://cloudcrane.ai/blueprints/applied-3gdq7p5dkd)
-[![PWA](https://img.shields.io/badge/PWA-Installable-blue)](https://ashish-ranjan.cloud)
-[![Tests](https://img.shields.io/badge/E2E%20Tests-29%2F29%20Passed-brightgreen)](https://ashish-ranjan.cloud)
+[![PWA](https://img.shields.io/badge/PWA-Installable-blue)](https://ashish-ranjan.cloud/CloudCrane)
+[![Tests](https://img.shields.io/badge/E2E%20Tests-29%2F29%20Passed-brightgreen)](https://ashish-ranjan.cloud/CloudCrane)
 
 A mobile-first, offline-ready Progressive Web App (PWA) built for the **CloudCrane First-Round Challenge**.
 
-* **Live Custom Domain:** [https://ashish-ranjan.cloud](https://ashish-ranjan.cloud)
+* **Live Custom Domain PWA:** [https://ashish-ranjan.cloud/CloudCrane](https://ashish-ranjan.cloud/CloudCrane)
 * **Live CloudCrane Blueprint:** [https://cloudcrane.ai/blueprints/applied-3gdq7p5dkd](https://cloudcrane.ai/blueprints/applied-3gdq7p5dkd)
 * **CloudCrane Host:** [https://applied-3gdq7p5dkd.cloudcrane.ai/](https://applied-3gdq7p5dkd.cloudcrane.ai/)
 
@@ -37,7 +37,7 @@ A mobile-first, offline-ready Progressive Web App (PWA) built for the **CloudCra
 
 ```mermaid
 flowchart TD
-    User["Phone / Browser"] -->|"PWA (Standalone)"| Cloud["https://ashish-ranjan.cloud"]
+    User["Phone / Browser"] -->|"PWA (Standalone)"| Cloud["https://ashish-ranjan.cloud/CloudCrane"]
     User -->|"CloudCrane Host"| CC["https://applied-3gdq7p5dkd.cloudcrane.ai"]
     CC -->|"Public Blueprint"| BP["https://cloudcrane.ai/blueprints/applied-3gdq7p5dkd"]
     Agent["Antigravity Agent"] -->|"Streamable HTTP MCP"| CC

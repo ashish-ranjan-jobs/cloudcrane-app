@@ -13,7 +13,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-TARGET_URL = "https://ashish-ranjan.cloud/"
+TARGET_URL = "https://ashish-ranjan.cloud/CloudCrane/"
 
 def run_tests():
     results = []
